@@ -5,6 +5,10 @@ Created on Oct 26, 2018
 '''
 import re
 import os
+import nltk
+
+from stop_words import get_stop_words
+en_stop = get_stop_words('en') # list of stopwords/english
 
 #===============================================================================
 # Folder manipulation
@@ -27,3 +31,30 @@ def fname_splitter(docslist):
     return(fnames)
 #getting the filenames from uri of whatever documents were processed in the input folder   
 
+#===============================================================================
+# Document Reading/Writing
+#===============================================================================
+def cleanText(fname, input_file_abs, output_path):
+    ops = open(output_path+'/'+fname,'w+') #file where we are writing (same name it was read)
+    with open(input_file_abs, 'r', encoding='utf-8') as fin:
+        for lines in fin.readlines():
+            words = str(lines) #stream into string
+            #cleaning each line
+            words = words.lower() #everything in lower case
+            words = words.split() #split by whitespace
+            #words = [i for i in words[:] if not i in en_stop] #get rid of stop words
+            #words = nltk.pos_tag(words) #POS-tagger via NLTK
+            outputFile(words, ops)
+        ops.close()
+        fin.close()
+#reads file line by line and clean it
+
+def outputFile(text, writer):  
+    if text:
+        for words in text:
+            writer.write(str(words) + ' ')
+        writer.write('\n')
+    else:
+        #print('Empty line !!!')
+        pass # nothing to save
+#writes sentence into a file

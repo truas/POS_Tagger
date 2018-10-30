@@ -53,4 +53,7 @@ if __name__ == '__main__':
     #Doc and File list
     doc_paths =  fm.doclist_multifolder(in_foname)
     doc_names = fm.fname_splitter(doc_paths)
+    
+    for index, fname in enumerate(doc_paths):
+        fm.cleanText(doc_names[index], fname, ou_foname)
    
