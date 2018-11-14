@@ -9,6 +9,8 @@ Folder used to read/write should be in the same level at 'default' package
 
 UPDATES:
 ==========
+[2018-11-14]
+1. cleanString implemented to get rid of specific chars
 [2018-10-29]
 1. Reading/writing files - line-by-line, 
 2. Text clean and stopwords removal
