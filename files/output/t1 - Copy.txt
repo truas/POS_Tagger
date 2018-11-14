@@ -1,0 +1,4 @@
+potato 
+finite size and derive the corresponding scaling properties in the critical region 
+for scale-free networks with the degree distribution math-italic-p math-open math-italic-k math-close math-relopsimilar-to math-italic-k math-postsuperscriptstart math-addopminus 
+math-italic-gamma math-postsuperscriptend at large math-italic-k we found that the finite size exponent math-overaccentbar math-argstart math-italic-nu math-argend takes on the value math-number5 math-mulopdivide math-number2 when math-italic-gamma math-relopgreater-than math-number5  the same as in the globally coupled kuramoto model 

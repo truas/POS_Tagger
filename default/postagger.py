@@ -47,7 +47,7 @@ if __name__ == '__main__':
     #===========================================================================
     # IDE - Path Definitions
     #===========================================================================
-    in_foname = 'C:/Users/terry/Documents/Programming/eclipse-workspace/POS_Tagger/files/input'
+    in_foname = 'C:/Users/terry/Documents/Programming/eclipse-workspace/POS_Tagger/files/input/d3'
     ou_foname = 'C:/Users/terry/Documents/Programming/eclipse-workspace/POS_Tagger/files/output'
     
     #Doc and File list
