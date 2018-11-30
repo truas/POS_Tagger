@@ -1,2 +1,2 @@
-iam a word and nothing else is part- math-symbol 
-?math-is-cool math-is-cool math-is-cool maths-cool 
+('iam', 'NN') ('word', 'NN') ('noth', 'DT') ('els', 'NNS') ('part-', 'JJ') ('math-symbol', 'NN') 
+('?math-is-cool', 'JJ') ('math-is-cool', 'JJ') ('math-is-cool', 'JJ') ('maths-cool', 'NN') 
