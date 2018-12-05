@@ -11,6 +11,7 @@ UPDATES:
 ==========
 [2018-11-29]
 1. makeLowerCase and applyStemmer ignore words beginning with <math->
+
 [2018-11-28]
 1. Several pre-processing functions implemented
 2. NLTK tagger working
