@@ -15,9 +15,10 @@ UPDATES:
 ==========
 [2018-12-07]
 1. removePlurals() using `inflection`
-2. Included all POS tag from NLTK in the end od `file_manipulation.py`
+2. Included all POS tags from NLTK in the end od `file_manipulation.py`
 3. Simple refactoring
 4. Fixed relative imports from default. package
+
 
 
 [2018-12-04]
