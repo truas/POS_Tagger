@@ -13,6 +13,12 @@ Folder used to read/write should be in the same level at 'default' package
   
 UPDATES:
 ==========
+[2018-12-20]
+1. Implemented NOUNS+ concatenation
+2. Better punctuation removal
+3. Holy Grail `math-<?>`
+
+
 [2018-12-17]
 1. Fixed all filters to ignore `math-<?>` tokens. It also does not concatenate `math-<?>` tokens
 

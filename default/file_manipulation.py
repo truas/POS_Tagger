@@ -7,6 +7,7 @@ import os
 import nltk
 import re
 import inflection
+import string
 
 from nltk.stem.lancaster import LancasterStemmer
 #from pattern.text.en import singularize
@@ -30,7 +31,9 @@ NNPS proper noun, plural Americans
 
 '''
 keep_tags = ['JJ','JJR','JJS','NN','NNS','NNP','NNPS']
-
+keep_noun = ['NN','NNS','NNP','NNPS']
+keep_adj = ['JJ','JJR','JJS']
+remove_punct_map = dict.fromkeys(map(ord, string.punctuation)) #dictionary to remove punctuation
 #===============================================================================
 # Document Reading/Writing
 #===============================================================================
@@ -39,17 +42,19 @@ def cleanText(fname, input_file_abs, output_path):
     with open(input_file_abs, 'r', encoding='utf-8') as fin:
         for lines in fin.readlines():
             if not lines.strip():continue #skip blanklines
-            
             words = str(lines) #stream into string
-            words = tokenizeWords(words) #tokenize things for tagger
-            words = applyPOStag(words) #POS-tagger via NLTK  
+            words = words.split()
+            words = applyPOStag(words) #POS-tagger via NLTK
+            words = removePunctuation(words) #removes punctuation - even attached to words
             #words = makeLowerCase_notags(words) # makeLowerCase_tags(words) if applyPOS(words) is executed
             words = makeLowerCase_tags(words) # makeLowerCase_notags(words) if applyPOS(words) is NOT executed
-            words = removeStopWords(words) #get rid of stop words     
-            words = cleanStringPunctuation(words) #remove punctuation and weird chars
-            words = removePluras(words)
+            words = chainNouns(words)    
+            
+            
+            #words = removeStopWords(words) #get rid of stop words 
+            #words = removePluras(words)
             if not words:continue #in case after all pre-processing cleans all words we skip this sentence
-            words = concatenateTAG(words)
+            words = removeTags(words)
             outputFile(words, ops)
         ops.close()
         fin.close()
@@ -80,7 +85,7 @@ def concatenateTAG(words):
             no_tag_words.append(word)
         else:
             n_word,n_tag = words[index+1]
-            if(n_word.startswith('math')):continue #prevents a non math token to be put together with future math token
+            if(n_word.startswith('math-')):continue #prevents a non math token to be put together with future math token
             no_tag_words.append(glueNounsAdjective(word, tag, n_word, n_tag))
             
     last_word,last_tag = words[-1] # we need to have the last word regardless of the outcome
@@ -95,6 +100,51 @@ def glueNounsAdjective(current_word, current_tag, next_word, next_tag):
         new_token = current_word
     return (new_token)
 #returns one single token composed by Noun-Adjective (any owrder) based on their tags
+
+def chainNouns(words):
+    i = 0
+    nouns_words = []
+    noun_chain = []
+    while (i < len(words)-1):
+        curr_word,curr_tag = words[i]
+        if(curr_word.startswith('math-')):
+            noun_token = appendTokenChain(noun_chain)
+            nouns_words.append((noun_token,curr_tag))  #in case there is any word that precedes math-
+            noun_chain.clear() #begin a new chain of nouns           
+            nouns_words.append((curr_word,curr_tag))
+            i+=1
+        else:
+            if(curr_tag in keep_noun):
+                noun_chain.append(curr_word)
+                next_word, next_tag = words[i+1] #let's take a look on the next token
+                i+=1
+                if(next_tag in keep_noun): #the next token is a noun, we can proceed
+                    continue 
+                else:
+                    noun_token = appendTokenChain(noun_chain)
+                    nouns_words.append((noun_token,curr_tag))  #the first tag is maintained
+                    noun_chain.clear() #begin a new chain of nouns
+            else:
+                nouns_words.append((curr_word,curr_tag))#if 
+                i+=1
+    return(nouns_words)
+#checks for noun-tokens and put them together as in nouns+
+#if the next token is not a noun we break the chain
+           
+def appendTokenChain(words):
+    token =""
+    for word in words:
+        token+= word + '_'
+    return(token[:-1])
+#put together tokens that are in the same list
+
+def removeTags(words):
+    new_words = []
+    for words,tags in words:
+        if words is None: continue #in case there is any trash in the word-list
+        new_words.append(words)
+    return(new_words)
+#remove tag from words
 
 def applyPOStag(words):
     tagged_words = nltk.pos_tag(words) #uses the Penn Treebank Tag Set.
@@ -119,7 +169,6 @@ def makeLowerCase_notags(words):
     lower_case = []
     for word in words:
         if(word.startswith('math-')):
-            #print(word)
             lower_case.append(word)
         else:
             lower_case.append(word.lower())
@@ -132,7 +181,7 @@ def removePluras(words):
         if(word.startswith('math-')):
             singles.append((word,tag))
         else:
-            singles.append((inflection.singularize(word),tag)) #using infletcion library
+            singles.append((inflection.singularize(word),tag)) #using inflection library
             #singles.append((singularize(word),tag)) #using pattern.en
     return (singles)
 #gets rid of plurals
@@ -143,20 +192,16 @@ def removeStopWords(words):
     return(no_sw_words)
 #removes stopwords from list of words
 
-def cleanStringPunctuation(words):
+def removePunctuation(words):
     tokens = []
     for word,tag in words:
         if(word.startswith('math-')):
             tokens.append((word,tag))
         else:
-            clean_word = word.translate({ord(c): None for c in '()[]{}\'\".;:,!@#$'})
-            if(clean_word): 
-                tokens.append((clean_word,tag)) #only keep valid items
-            else:
-                continue # we don't want a empty space in the list
-    return(tokens)
-#returns a list of clean tokens - gets rid of anything between ' ' by  replacing for None
-#it also removes the entry for that empty token in our list
+            w = word.translate(remove_punct_map)
+            tokens.append((w,tag))
+    return (tokens)
+#removes punctuation - most efficieent - lookptable
 
 #===============================================================================
 # Folder manipulation
@@ -182,6 +227,22 @@ def fname_splitter(docslist):
 #===============================================================================
 # Not Used: 2018-12-04
 #===============================================================================
+def cleanStringPunctuation(words):
+    tokens = []
+    for word,tag in words:
+        if(word.startswith('math-')):
+            tokens.append((word,tag))
+        else:
+            clean_word = word.translate({ord(c): None for c in '()[]{}\'\".;:,!@#$'})
+            if(clean_word): 
+                tokens.append((clean_word,tag)) #only keep valid items
+            else:
+                continue # we don't want a empty space in the list
+    return(tokens)
+#returns a list of clean tokens - gets rid of anything between ' ' by  replacing for None
+#it also removes the entry for that empty token in our list
+#this is more customizable the way you want - slower
+
 def applyStemmer(words):
     st = LancasterStemmer()
     ste_words = []
@@ -197,6 +258,9 @@ def removeASCIItrash(words):
     cwords = words.encode('ascii', 'ignore').decode("utf-8")
     return (cwords)
 #removing unwanted chars/trash from sentences as strings
+
+
+
 
 #List of NLTK POS tags
 '''
